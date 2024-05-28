@@ -163,39 +163,39 @@ public class UserSignup extends javax.swing.JFrame {
     private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed
       
 String userEmail = TEmail.getText();
-      String userPassword = new String(PPassword.getPassword());
-      
+String userPassword = new String(PPassword.getPassword());
 
-        // Check if any field is empty
-if (userEmail.isEmpty() || userPassword.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-} else {
-        try {
+try {
+    // Check if email or fullname already exists
+    PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
+    checkStmt.setString(1, userEmail);
+    ResultSet rs = (ResultSet) checkStmt.executeQuery();
+
+    if (rs.next()) {
+        // If either email or fullname exists, show an error message
+        JOptionPane.showMessageDialog(this, "Email or Fullname is already in use. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        // If email and fullname do not exist, proceed with insertion
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO users (username, password, status) VALUES (?, ?, ?)");
+        ps.setString(1, userEmail);
+        ps.setString(2, userPassword);
+        ps.setString(3, "user"); // Set the default status as "user"
+
+        int rowsInserted = ps.executeUpdate();
+        if (rowsInserted > 0) {
+            JOptionPane.showMessageDialog(this, "Sign up successful!");
+
+            TEmail.setText("");
+            PPassword.setText("");
             
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO users (username, password) VALUES ( ?, ?)");
-            ps.setString(1, userEmail);
-            ps.setString(2, userPassword);
-
-
-
-            int rowsInserted = ps.executeUpdate();
-            if (rowsInserted > 0) {
-                JOptionPane.showMessageDialog(this, "Sign up successful!");
-                 UserLogin loginForm = new UserLogin();
-                 loginForm.setVisible(true);
-                 this.dispose();
-                
-                TEmail.setText("");
-                PPassword.setText("");
-
-            } else {
-                JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(UserSignup.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+            JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+} catch (SQLException ex) {
+    Logger.getLogger(UserSignup.class.getName()).log(Level.SEVERE, null, ex);
 }
+
     }//GEN-LAST:event_BSignupActionPerformed
 
     /**
