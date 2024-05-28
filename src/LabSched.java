@@ -1,4 +1,6 @@
-
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -10,13 +12,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JFrame;
 
 public final class LabSched extends javax.swing.JFrame {
  private static final String URL = "jdbc:mysql://localhost:3306/labsched?zeroDateTimeBehavior=CONVERT_TO_NULL";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "12345";
     private Connection con;
+    private int roomUsageCount;
+    private Component frame;
+ 
     
     public LabSched() {
         initComponents();
@@ -31,10 +38,15 @@ public final class LabSched extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Failed to connect to the database.");
         }
+    
+    
+     setTitle("Schedule Manager");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
     }
     
-
-   
+    
         
         private void setupYearLevelSubjectDependencies() {
         CBYearLevel.addActionListener(e -> updateSubjectOptions());
@@ -160,18 +172,23 @@ public final class LabSched extends javax.swing.JFrame {
         CBTime = new javax.swing.JComboBox<>();
         BAdd = new javax.swing.JButton();
         BPrint = new javax.swing.JButton();
-        BReset = new javax.swing.JButton();
-        BSave = new javax.swing.JButton();
+        BEdit = new javax.swing.JButton();
         BPreview = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
         CBRoom = new javax.swing.JComboBox<>();
+        jPanel3 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        BLogout = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(158, 209, 206));
 
-        jPanel1.setBackground(new java.awt.Color(246, 246, 238));
+        jPanel1.setBackground(new java.awt.Color(158, 209, 206));
+        jPanel1.setPreferredSize(new java.awt.Dimension(1534, 800));
 
-        LabTable.setBackground(new java.awt.Color(158, 209, 206));
+        LabTable.setBackground(new java.awt.Color(246, 246, 238));
         LabTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -233,7 +250,7 @@ public final class LabSched extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel10.setText("Time:");
 
-        TName.setBackground(new java.awt.Color(175, 228, 228));
+        TName.setBackground(new java.awt.Color(246, 246, 238));
         TName.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         TName.setPreferredSize(new java.awt.Dimension(160, 30));
 
@@ -268,30 +285,35 @@ public final class LabSched extends javax.swing.JFrame {
         CBSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "First Semester", "Second Semester" }));
         CBSemester.setPreferredSize(new java.awt.Dimension(160, 30));
 
-        CBSubject.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Laboratory Maintenance", "Introduction to Computing", "Computer Programming 1", "College Algebra", "Introduction to IT", "Communication Skills", "Mathematics in the Modern World", "Philippine History", "Physical Education", " ", " " }));
+        CBSubject.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Laboratory Maintenance", "First Year - First Sem", "Introduction to Computing ", "Programming 1", "Fundamentals of Database Systems\t", "Purposive Communication / Malayuning Komunikasyon\t", "Understanding the Self / Pang Unawa sa Sarili", "Mathematics in the Modern World / Matematika sa Makabagong Daigdig", "Self-Testing Activities", "National Service Training Program 1", "First Sem - Second Sem", "Programming 2\t\t", "Introduction to IT Systems\t", "Data Structures and Algorithms\t", "Readings in Philippine History / Mga Babasahin hinggil", "sa Kasaysayan ng Pilipinas\t", "Art Appreciation / Pagpapahalaga sa Sining\t", "The Contemporary World / Ang Kasalukuyang Daigdig", "Kontekswalisadong Komunikasyon sa Filipino", "Rhythmic Activities\t", "National Service Training Program 2", "Second Year - First Sem", "Networking 1\t", "Desktop Publishing\t", "Web and Multimedia Systems\t", "Information Management", "Ethics / Etika\t", "Science, Technology & Society / Agham, Teknolohiya at Lipunan\t", "Life and Works of Rizal\t", "Individual and Dual Sports", "Scond Year - Second Sem", "Developments and Emerging Technologies\t", "Discrete Mathematics\t", "Networking 2\t", "Introduction to Visual Design\t", "Introduction to Human Computer Interaction\t", "Filipino sa Iba’t-Ibang Disiplina\t", "Philippine Popular Culture", "Team Sports\t", "Third Year - First Sem AP&DD", "Information Assurance and Security\t", "Quantitative Methods\t", "Current Trends in IT\t", "System Administration and Maintenance", "Fundamentals of Video Production\t", "Mathematics and Statistics for IT\t", "Reading Visual Arts\t", "Third Year - Second Sem AP&DD", "Integrative Programming Technologies\t", "Platform Technologies\t", "Object Oriented Programming\t", "Technical and Professional Communications\t", "IT Business Ventures\t", "People and the Earth’s Ecosystem\t", "Fundamentals of Digital Sound Production\t", "Video Processing", "Fourth Year - First Sem", "Capstone Project and Research 2\t", "Social and Professional Issues in IT\t", "Image Processing\t", "Organic Modeling\t", "Cybersecurity\t", "English for IT\t" }));
         CBSubject.setPreferredSize(new java.awt.Dimension(160, 30));
 
         CBTime.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 1:00 PM", "1:00 PM - 2:00 PM", "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM", "4:00 PM - 5:00 PM", "5:00 PM - 6:00 PM", "6:00 PM - 7:00 PM", "7:00 PM - 8:00 PM", "8:00 PM - 9:00 PM" }));
         CBTime.setPreferredSize(new java.awt.Dimension(160, 30));
 
+        BAdd.setBackground(new java.awt.Color(204, 102, 0));
+        BAdd.setForeground(new java.awt.Color(255, 255, 255));
         BAdd.setText("Add");
+        BAdd.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         BAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 BAddActionPerformed(evt);
             }
         });
 
-        BPrint.setBackground(new java.awt.Color(51, 107, 210));
+        BPrint.setBackground(new java.awt.Color(204, 102, 0));
         BPrint.setForeground(new java.awt.Color(255, 255, 255));
         BPrint.setText("Print");
 
-        BReset.setBackground(new java.awt.Color(255, 51, 51));
-        BReset.setForeground(new java.awt.Color(255, 255, 255));
-        BReset.setText("Reset");
-
-        BSave.setBackground(new java.awt.Color(0, 153, 0));
-        BSave.setForeground(new java.awt.Color(255, 255, 255));
-        BSave.setText("Save");
+        BEdit.setBackground(new java.awt.Color(204, 102, 0));
+        BEdit.setForeground(new java.awt.Color(255, 255, 255));
+        BEdit.setText("edit");
+        BEdit.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        BEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BEditActionPerformed(evt);
+            }
+        });
 
         BPreview.setBackground(new java.awt.Color(204, 102, 0));
         BPreview.setForeground(new java.awt.Color(255, 255, 255));
@@ -302,151 +324,198 @@ public final class LabSched extends javax.swing.JFrame {
 
         CBRoom.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Computer Laboratory 1", "Computer Laboratory 2A", "Computer Laboratory 2B", "Computer Laboratory 3", "Computer Laboratory 4", "Smart Classroom", "CHS Laboratory", "Audio Visual Room", "ICTC Lobby" }));
 
-        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/ascot.jpg"))); // NOI18N
+        jPanel3.setBackground(new java.awt.Color(102, 102, 102));
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 15, Short.MAX_VALUE)
+        );
+
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        jLabel12.setText("Powered by: Department of Information Technology");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
-                        .addComponent(BReset, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(47, 47, 47)
-                        .addComponent(BSave, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(11, 11, 11)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(BAdd)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel5)
-                                .addComponent(jLabel4)
-                                .addComponent(jLabel3)
-                                .addComponent(jLabel10)
-                                .addComponent(jLabel9)
-                                .addComponent(jLabel7)
-                                .addComponent(jLabel6)
-                                .addComponent(jLabel8)
-                                .addComponent(jLabel2)
-                                .addComponent(jLabel1)
-                                .addComponent(jLabel11)))
-                        .addGap(59, 59, 59)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(TName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBPosition, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBSubject, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBWeek, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBYearLevel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBTime, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBSection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBSemester, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBDay, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBMonth, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(CBRoom, 0, 0, Short.MAX_VALUE))))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel12))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addGap(22, 22, 22)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(BPreview)
-                                .addGap(18, 18, 18)
-                                .addComponent(BPrint))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1214, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())))
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel9))
+                        .addGap(32, 32, 32)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CBPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(TName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBSemester, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBYearLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBSubject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBWeek, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CBDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(27, 27, 27))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(32, 32, 32)
+                        .addComponent(BEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(50, 50, 50)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(BPreview)
+                        .addGap(79, 79, 79)
+                        .addComponent(BPrint))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1214, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel12)
+                .addGap(607, 607, 607))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addComponent(BAdd)
+                .addGap(21, 21, 21)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addComponent(jLabel1)
-                        .addGap(30, 30, 30))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(TName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(CBPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(23, 23, 23)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CBSemester, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(CBYearLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(CBSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(35, 35, 35)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel10)
-                            .addComponent(CBTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(CBSubject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel11)
-                    .addComponent(CBRoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(46, 46, 46)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3)
-                    .addComponent(CBMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(37, 37, 37)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(CBWeek, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(31, 31, 31)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(CBDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
-                .addGap(115, 115, 115))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jLabel12)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 653, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(26, 26, 26)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(BSave, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(BReset, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(TName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addComponent(jLabel2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(CBPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(BPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(BPreview, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(30, Short.MAX_VALUE))
+                            .addComponent(CBSemester, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(20, 20, 20)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(CBYearLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(27, 27, 27)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(CBSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(34, 34, 34)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel9)
+                            .addComponent(CBSubject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(28, 28, 28)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(CBTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(34, 34, 34)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel11)
+                            .addComponent(CBRoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(36, 36, 36)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(CBMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(22, 22, 22)
+                                .addComponent(jLabel4))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(CBWeek, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(25, 25, 25)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(CBDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(BAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(BEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 653, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(BPreview, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(BPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
+
+        jPanel2.setBackground(new java.awt.Color(102, 102, 102));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 15, Short.MAX_VALUE)
+        );
+
+        jLabel13.setFont(new java.awt.Font("Microsoft YaHei Light", 1, 16)); // NOI18N
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/ascot-removebg-preview (1).png"))); // NOI18N
+        jLabel13.setText("LABORATORY SCHEDULER");
+
+        BLogout.setBackground(new java.awt.Color(204, 102, 0));
+        BLogout.setForeground(new java.awt.Color(255, 255, 255));
+        BLogout.setText("Logout");
+        BLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BLogoutActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(635, Short.MAX_VALUE)
+                .addComponent(jLabel13)
+                .addGap(549, 549, 549)
+                .addComponent(BLogout)
+                .addGap(24, 24, 24))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1531, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(BLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 779, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -454,8 +523,89 @@ public final class LabSched extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void BAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BAddActionPerformed
+    private void BEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BEditActionPerformed
+     int selectedRow = LabTable.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a row to edit.", "No Row Selected", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+
     String name = TName.getText();
+    String position = (String) CBPosition.getSelectedItem();
+    String semester = (String) CBSemester.getSelectedItem();
+    String yearLevel = (String) CBYearLevel.getSelectedItem();
+    String section = (String) CBSection.getSelectedItem();
+    String subject = (String) CBSubject.getSelectedItem();
+    String time = (String) CBTime.getSelectedItem();
+    String room = (String) CBRoom.getSelectedItem();
+    String month = (String) CBMonth.getSelectedItem();
+    String week = (String) CBWeek.getSelectedItem();
+    String day = (String) CBDay.getSelectedItem();
+
+    if (name.isEmpty() || position == null || semester == null || yearLevel == null || section == null || subject == null || time == null || room == null || month == null || week == null || day == null) {
+        JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    boolean slotTaken = false, userSubjectConflict = false, userTimeConflict = false;
+
+    for (int i = 0; i < model.getRowCount(); i++) {
+        if (i != selectedRow) {
+            String existingName = (String) model.getValueAt(i, 0);
+            String existingSemester = (String) model.getValueAt(i, 2);
+            String existingMonth = (String) model.getValueAt(i, 8);
+            String existingWeek = (String) model.getValueAt(i, 9);
+            String existingDay = (String) model.getValueAt(i, 10);
+            String existingTime = (String) model.getValueAt(i, 6);
+            String existingSubject = (String) model.getValueAt(i, 5);
+
+            if (name.equals(existingName) && subject.equals(existingSubject)) {
+                userSubjectConflict = true;
+                break;
+            }
+            if (name.equals(existingName) && semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
+                userTimeConflict = true;
+                break;
+            }
+            if (semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
+                slotTaken = true;
+                break;
+            }
+        }
+    }
+
+    if (userSubjectConflict) {
+        JOptionPane.showMessageDialog(this, "This teacher is already assigned to the selected subject.", "Subject Conflict", JOptionPane.ERROR_MESSAGE);
+    } else if (userTimeConflict) {
+        JOptionPane.showMessageDialog(this, "This teacher already has a schedule at the selected time.", "Time Conflict", JOptionPane.ERROR_MESSAGE);
+    } else if (slotTaken) {
+        JOptionPane.showMessageDialog(this, "The selected time slot is already taken.", "Slot Taken", JOptionPane.ERROR_MESSAGE);
+    } else {
+        model.setValueAt(name, selectedRow, 0);
+        model.setValueAt(position, selectedRow, 1);
+        model.setValueAt(semester, selectedRow, 2);
+        model.setValueAt(yearLevel, selectedRow, 3);
+        model.setValueAt(section, selectedRow, 4);
+        model.setValueAt(subject, selectedRow, 5);
+        model.setValueAt(time, selectedRow, 6);
+        model.setValueAt(room, selectedRow, 7);
+        model.setValueAt(month, selectedRow, 8);
+        model.setValueAt(week, selectedRow, 9);
+        model.setValueAt(day, selectedRow, 10);
+
+        JOptionPane.showMessageDialog(this, "Schedule updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        clearFields();
+    }
+
+ 
+   
+
+    }//GEN-LAST:event_BEditActionPerformed
+
+    private void BAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BAddActionPerformed
+ String name = TName.getText();
     String position = (String) CBPosition.getSelectedItem();
     String room = (String) CBRoom.getSelectedItem();
     String month = (String) CBMonth.getSelectedItem();
@@ -467,14 +617,33 @@ public final class LabSched extends javax.swing.JFrame {
     String semester = (String) CBSemester.getSelectedItem();
     String subject = (String) CBSubject.getSelectedItem();
 
-    if (name.isEmpty() || position == null || yearLevel == null || section == null || subject == null || month == null || week == null || day == null || time == null || semester == null) {
-        JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-    } else {
-        DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+   if (name.isEmpty() || position == null || yearLevel == null || section == null || subject == null || month == null || week == null || day == null || time == null || semester == null) {
+    JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+} else {
+         DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+         
+            // Check if the selected laboratory room already has 3 users
+        int roomUserCount = 0;
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String existingRoom = (String) model.getValueAt(i, 7);
+            if (room.equals(existingRoom)) {
+                roomUserCount++;
+            }
+        }
+
+        if (roomUserCount >= 3) {
+            JOptionPane.showMessageDialog(this, "This laboratory is full. Please select another laboratory.", "Room Full", JOptionPane.ERROR_MESSAGE);
+            return;
+        }  
+       
+    int confirmDialog = JOptionPane.showConfirmDialog(this, "Do you want to add teacher schedule?", "Confirmation", JOptionPane.YES_NO_OPTION);
+    if (confirmDialog == JOptionPane.YES_OPTION) {
+      
         boolean slotTaken = false;
         boolean userSubjectConflict = false;
         boolean userTimeConflict = false;
-
+        int teacherCountInRoom = 0;
+    
         // Check for conflicts
         for (int i = 0; i < model.getRowCount(); i++) {
             String existingName = (String) model.getValueAt(i, 0);
@@ -499,24 +668,38 @@ public final class LabSched extends javax.swing.JFrame {
                 slotTaken = true;
                 break;
             }
+            Object existingRoom = null;
+            if (room.equals(existingRoom) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay)) {
+                    teacherCountInRoom++;
+                }
         }
 
         // Handle conflicts
-        if (userSubjectConflict) {
-            JOptionPane.showMessageDialog(this, "The user is already assigned to this subject.", "User Conflict", JOptionPane.WARNING_MESSAGE);
-        } else if (userTimeConflict) {
-            JOptionPane.showMessageDialog(this, "The user already has a schedule at this time on the same day.", "Time Conflict", JOptionPane.WARNING_MESSAGE);
-        } else if (slotTaken) {
-            suggestAvailableTimes(model, semester, month, week, day);
-        } else {
-            model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
-                        removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester );
+        // Check if the time slot is the last one (8:00 PM - 9:00 PM)
+                if (time.equals("08:00 PM - 09:00 PM")) {
+                    JOptionPane.showMessageDialog(this, "The time slot is full. Please select another laboratory.", "Time Slot Full", JOptionPane.ERROR_MESSAGE);
+                    // Set the next available time to 8:00 AM - 9:00 AM of the next day
+                    int currentDayIndex = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday").indexOf(day);
+                    int nextDayIndex = (currentDayIndex + 1) % 6;
+                    CBDay.setSelectedIndex(nextDayIndex);
+                    CBTime.setSelectedIndex(0); // Set to "08:00 AM - 09:00 AM"
+                } else {
+                    model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
+                    removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
 
-            clearFields();
-        }
+                    clearFields();
+                }
     }
+
+
+    }
+    }
+    private void suggestAlternativeRoom() {
+    String[] rooms = {"Laboratory 1", "Laboratory 2A", "Laboratory 2B", "Laboratory 3", "Laboratory 4", "Room 6", "Smart Classroom", "ICTC Lobby", "AVR"};
+    DefaultComboBoxModel<String> roomModel = new DefaultComboBoxModel<>(rooms);
+    CBRoom.setModel(roomModel);
+    JOptionPane.showMessageDialog(this, "The selected laboratory room is full for the day. Please choose another room.", "Room Full", JOptionPane.WARNING_MESSAGE);
 }
-    
 
 private void suggestAvailableTimes(DefaultTableModel model, String semester, String month, String week, String day) {
     String[] times = {"08:00 AM - 09:00 AM", "09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM", "05:00 PM - 06:00 PM"};
@@ -548,11 +731,21 @@ private void suggestAvailableTimes(DefaultTableModel model, String semester, Str
                         if (semester.equals(existingSemester) && currentMonth.equals(existingMonth) && currentWeek.equals(existingWeek) && currentDay.equals(existingDay) && time.equals(existingTime)) {
                             isAvailable = false;
                             break;
+                        
+                        }
+                        if (!isAvailable) {
+                            break;
                         }
                     }
                     if (isAvailable) {
-                        timeModel.addElement(time);
+                        int duration = 0;
+                        for (int i = 0; i < duration; i++) {
+                            int timeIndex = 0;
+                            int checkTimeIndex = (timeIndex + i) % times.length;
+                            timeModel.addElement(times[checkTimeIndex]);
+                        }
                         foundAvailableTime = true;
+                        break;
                     }
                 }
                 if (foundAvailableTime) {
@@ -743,23 +936,21 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
         timeModel.addElement(t);
     }
 }
+private void clearFields() {
+    TName.setText("");
+    CBPosition.setSelectedIndex(-1);
+    CBSemester.setSelectedIndex(-1);
+    CBYearLevel.setSelectedIndex(-1);
+    CBSection.setSelectedIndex(-1);
+    CBSubject.setSelectedIndex(-1);
+    CBTime.setSelectedIndex(-1);
+    CBRoom.setSelectedIndex(-1);
+    CBMonth.setSelectedIndex(-1);
+    CBWeek.setSelectedIndex(-1);
+    CBDay.setSelectedIndex(-1);
 
 
-
-
-    private void clearFields() {
-        TName.setText("");
-        CBPosition.setSelectedIndex(0);
-        CBYearLevel.setSelectedIndex(0);
-        CBSection.setSelectedIndex(0);
-        CBRoom.setSelectedIndex(0);
-        CBSubject.setSelectedIndex(0);
-        CBMonth.setSelectedIndex(0);
-        CBWeek.setSelectedIndex(0);
-        CBDay.setSelectedIndex(0);
-        CBTime.setSelectedIndex(0);
-        CBSemester.setSelectedIndex(0);
-
+            
     }//GEN-LAST:event_BAddActionPerformed
 
     private void CBSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CBSectionActionPerformed
@@ -769,6 +960,24 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
     private void CBYearLevelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CBYearLevelActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_CBYearLevelActionPerformed
+
+    private void BLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BLogoutActionPerformed
+ // Ask for logout confirmation
+        int response = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to log out?",
+                "Logout Confirmation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        // Check the user's response
+        if (response == JOptionPane.YES_OPTION) {
+            // Perform logout logic
+            dispose();
+        }
+
+    }//GEN-LAST:event_BLogoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -809,10 +1018,10 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BAdd;
+    private javax.swing.JButton BEdit;
+    private javax.swing.JButton BLogout;
     private javax.swing.JButton BPreview;
     private javax.swing.JButton BPrint;
-    private javax.swing.JButton BReset;
-    private javax.swing.JButton BSave;
     private javax.swing.JComboBox<String> CBDay;
     private javax.swing.JComboBox<String> CBMonth;
     private javax.swing.JComboBox<String> CBPosition;
@@ -829,6 +1038,7 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -838,6 +1048,8 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }
