@@ -345,6 +345,7 @@ public final class LabSched extends javax.swing.JFrame {
         CBTime.setPreferredSize(new java.awt.Dimension(160, 30));
 
         BAdd.setBackground(new java.awt.Color(204, 102, 0));
+        BAdd.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         BAdd.setForeground(new java.awt.Color(255, 255, 255));
         BAdd.setText("Add");
         BAdd.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -355,8 +356,9 @@ public final class LabSched extends javax.swing.JFrame {
         });
 
         BEdit.setBackground(new java.awt.Color(204, 102, 0));
+        BEdit.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         BEdit.setForeground(new java.awt.Color(255, 255, 255));
-        BEdit.setText("Edit");
+        BEdit.setText("Update");
         BEdit.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         BEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -538,7 +540,7 @@ public final class LabSched extends javax.swing.JFrame {
                 .addGap(24, 24, 24))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1653, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1655, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1035,16 +1037,16 @@ private void resetTimeModel(DefaultComboBoxModel<String> timeModel) {
 }
 private void clearFields() {
     TName.setText("");
-    CBPosition.setSelectedIndex(-1);
-    CBSemester.setSelectedIndex(-1);
-    CBYearLevel.setSelectedIndex(-1);
-    CBSection.setSelectedIndex(-1);
-    CBSubject.setSelectedIndex(-1);
-    CBTime.setSelectedIndex(-1);
-    CBRoom.setSelectedIndex(-1);
-    CBMonth.setSelectedIndex(-1);
-    CBWeek.setSelectedIndex(-1);
-    CBDay.setSelectedIndex(-1);
+    CBPosition.setSelectedIndex(0);
+    CBSemester.setSelectedIndex(0);
+    CBYearLevel.setSelectedIndex(0);
+    CBSection.setSelectedIndex(0);
+    CBSubject.setSelectedIndex(0);
+    CBTime.setSelectedIndex(0);
+    CBRoom.setSelectedIndex(0);
+    CBMonth.setSelectedIndex(0);
+    CBWeek.setSelectedIndex(0);
+    CBDay.setSelectedIndex(0);
 
 
             

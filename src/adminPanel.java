@@ -1,7 +1,13 @@
 
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
 import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +42,8 @@ public class adminPanel extends javax.swing.JFrame {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "12345";
     private Connection conn;
+    private javax.swing.JComboBox<String> CBRoom;
+
     /**
      * Creates new form adminPanel
      */
@@ -370,10 +378,46 @@ public class adminPanel extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Please select a row to delete", "Selection Error", JOptionPane.ERROR_MESSAGE);
     }
     }//GEN-LAST:event_deletebtnActionPerformed
+private void printTable(JTable table, String room) throws PrinterException {
+    PrinterJob printerJob = PrinterJob.getPrinterJob();
+    printerJob.setPrintable((Graphics graphics, PageFormat pageFormat, int pageIndex) -> {
+        if (pageIndex > 0) {
+            return Printable.NO_SUCH_PAGE;
+        }
+        Graphics2D g2d = (Graphics2D) graphics;
+        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+        // Print default text at middle top
+        String header = "LABORATORY SCHEDULE, Shared / Alternating Utilization, 2nd Semester. SY 2023-2024";
+        FontMetrics metrics = g2d.getFontMetrics();
+        var x1 = (int) ((pageFormat.getImageableWidth() - metrics.stringWidth(header)) / 2);
+        g2d.drawString(header, x1, metrics.getHeight());
+        // Print Laboratory with selected room
+        String laboratory = "Laboratory " + room;
+        g2d.drawString(laboratory, (int) pageFormat.getImageableX(), (int) pageFormat.getImageableY() + metrics.getHeight() * 2);
+        // Translate the graphics to the start of the table
+        g2d.translate(0, metrics.getHeight() * 3);
+        // Render the JTable to fit the printable area
+        double scale = 1.0;
+        double width1 = pageFormat.getImageableWidth() / scale;
+        double height1;
+        height1 = pageFormat.getImageableHeight() / scale;
+        g2d.scale(scale, scale);
+        table.setSize((int) width1, table.getRowHeight() * (table.getRowCount() + 1));
+        table.print(g2d);
+        return Printable.PAGE_EXISTS;
+    });
+    if (printerJob.printDialog()) {
+        printerJob.print();
+    }
+}
+
+    private void BPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BPrintActionPerformed
+    printTable(LabTable);
+}  
+
+// Modify the printTable method to accept the selected room name
 private void printTable(JTable table) {
-      try {
-        // Baguhin ang laki ng JTable bago ito i-print
-        table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+   try {
         boolean complete = table.print(); // I-print ang JTable
         if (complete) {
             System.out.println("Printing Successful");
@@ -383,9 +427,6 @@ private void printTable(JTable table) {
     } catch (PrinterException pe) {
         System.out.println("Printing Failed: " + pe.getMessage());
     }
-}
-    private void BPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BPrintActionPerformed
-       printTable(LabTable); 
     }//GEN-LAST:event_BPrintActionPerformed
 
     /**
@@ -416,13 +457,11 @@ private void printTable(JTable table) {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new adminPanel().setVisible(true);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(adminPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        java.awt.EventQueue.invokeLater(() -> {
+            try {
+                new adminPanel().setVisible(true);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(adminPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
     }

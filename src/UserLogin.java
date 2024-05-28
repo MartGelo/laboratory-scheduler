@@ -11,7 +11,9 @@ import java.sql.DriverManager;
 
 public class UserLogin extends javax.swing.JFrame {
 
-    
+    private static final String URL = "jdbc:mysql://localhost/labsched";
+    private static final String USER = "root";
+    private static final String PASSWORD = "12345";
     Connection conn;
     
     public UserLogin() {
@@ -20,8 +22,8 @@ public class UserLogin extends javax.swing.JFrame {
     }
     
 
-     public void Connect(){
-       try {
+ public void Connect(){
+        try {
            Class.forName("com.mysql.jdbc.Driver");
            conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");
        } catch (ClassNotFoundException ex) {
@@ -29,8 +31,7 @@ public class UserLogin extends javax.swing.JFrame {
        } catch (SQLException ex) {
            Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
        }
-        
-    }
+ }
     
 
     /**
@@ -177,13 +178,10 @@ public class UserLogin extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void BLoginActionPerformed(java.awt.event.ActionEvent evt) throws ClassNotFoundException {                                       
-    String userEmail = TEmail.getText();
-    String userPassword = new String(PPassword.getPassword());
-
-    LabSched dashboardPanel = new LabSched();    
-    adminPanel Panel = new adminPanel();
+    private void BLoginActionPerformed(java.awt.event.ActionEvent evt) {                                       
     
+     String userEmail = TEmail.getText();
+    String userPassword = new String(PPassword.getPassword());
 
     try {
         PreparedStatement ps = (PreparedStatement) conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
@@ -198,13 +196,26 @@ public class UserLogin extends javax.swing.JFrame {
 
             // Close the login frame or panel
             setVisible(false); // Assuming this code is inside your login frame or panel
+            
+            adminPanel dashboardPanel = null;    
+            try {
+                dashboardPanel = new adminPanel();
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            LabSched userPanel = null;
+            try {
+                userPanel = new LabSched();
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             if (userStatus.equalsIgnoreCase("admin")) { // Assuming the status is either "admin" or "user"
                 // Show the dashboard panel
-                Panel.setVisible(true);
+                dashboardPanel.setVisible(true);
             } else { // Assuming the status is either "admin" or "user"
                 // Show the user panel
-                dashboardPanel.setVisible(true);
+                userPanel.setVisible(true);
             }
 
             // Optionally, you can clear the input fields after successful login
@@ -217,11 +228,7 @@ public class UserLogin extends javax.swing.JFrame {
     } catch (SQLException ex) {
         java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
-    
     }                                        
-    
-    
-    
                                   
 
     private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed

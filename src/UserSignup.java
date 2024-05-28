@@ -17,7 +17,7 @@ public class UserSignup extends javax.swing.JFrame {
     Connection conn;
     public UserSignup() {
         initComponents();
-        Connect ();
+        Connect();
     }
    
 
@@ -88,6 +88,11 @@ public class UserSignup extends javax.swing.JFrame {
         BLogin.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         BLogin.setForeground(new java.awt.Color(255, 255, 255));
         BLogin.setText("Login");
+        BLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BLoginActionPerformed(evt);
+            }
+        });
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
@@ -197,6 +202,12 @@ try {
 }
 
     }//GEN-LAST:event_BSignupActionPerformed
+
+    private void BLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BLoginActionPerformed
+        UserLogin login = new UserLogin();
+        login.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_BLoginActionPerformed
 
     /**
      * @param args the command line arguments
