@@ -14,10 +14,12 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 public final class LabSched extends javax.swing.JFrame {
- private static final String URL = "jdbc:mysql://localhost:3306/labsched?zeroDateTimeBehavior=CONVERT_TO_NULL";
+    private static final String JDBC_URL = "jdbc:mysql://localhost/labsched";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "12345";
     private Connection con;
@@ -25,26 +27,33 @@ public final class LabSched extends javax.swing.JFrame {
     private Component frame;
  
     
-    public LabSched() {
+    public LabSched() throws ClassNotFoundException {
         initComponents();
-        loadTableData();
         connectToDatabase();
+        loadTableData();
+
     }
     
-    private void connectToDatabase() {
-        try {
-            con = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            System.out.println("Connected to Database");
+ private void connectToDatabase() throws ClassNotFoundException {
+           try {
+           Class.forName("com.mysql.jdbc.Driver");
+           con = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");           
+           System.out.println("Connected to the database. ");
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Failed to connect to the database.");
         }
     
-    
-     setTitle("Schedule Manager");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
     }
+ 
+ public class DatabaseConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/labsched";
+    private static final String USER = "root";
+    private static final String PASSWORD = "12345";
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+
     
     
         
@@ -56,8 +65,10 @@ public final class LabSched extends javax.swing.JFrame {
         String selectedYearLevel = (String) CBYearLevel.getSelectedItem();
         DefaultComboBoxModel<String> subjectModel = new DefaultComboBoxModel<>();
 
-        List<String> firstYearSubjects = Arrays.asList("Math 101", "Science 101");
-        List<String> secondYearSubjects = Arrays.asList("Math 201", "Science 201");
+        List<String> firstYearSubjects = Arrays.asList("Introduction to Computing",  
+"Programming 1", "Fundamentals of Database Systems", "Purposive Communication", "Understanding the Self", "Mathematics in the Modern World", "Self-Testing Activities", "National Service Training Program 1");
+        List<String> secondYearSubjects = Arrays.asList("Networking 1", 	
+"Desktop Publishing", "Web and Multimedia Systems", "Information Management", "Ethics", "Science, Technology & Society", "Life and Works of Rizal", "Individual and Dual Sports");
         List<String> thirdYearSubjects = Arrays.asList("Math 301", "Science 301");
         List<String> fourthYearSubjects = Arrays.asList("Math 401", "Science 401");
 
@@ -120,16 +131,19 @@ public final class LabSched extends javax.swing.JFrame {
                     while (rs.next()) {
                         String name = rs.getString("name");
                         String position = rs.getString("position");
+                        String semester = rs.getString("semester");
                         String yearLevel = rs.getString("year_level");
                         String section = rs.getString("section");
                         String subject = rs.getString("subject");
+                        String time = rs.getString("time");
+                        String room = rs.getString("room");
                         String month = rs.getString("month");
                         String week = rs.getString("week");
                         String day = rs.getString("day");
-                        String semester = rs.getString("semester");
-                        String time = rs.getString("time");
                         
-                        model.addRow(new Object[]{name, position, yearLevel, section, subject, month, week, day, semester, time});
+                        
+                        
+                        model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
                     }
                 }
             } catch (SQLException ex) {
@@ -205,6 +219,7 @@ public final class LabSched extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        LabTable.setRowHeight(40);
         jScrollPane1.setViewportView(LabTable);
         if (LabTable.getColumnModel().getColumnCount() > 0) {
             LabTable.getColumnModel().getColumn(0).setPreferredWidth(150);
@@ -605,7 +620,8 @@ public final class LabSched extends javax.swing.JFrame {
     }//GEN-LAST:event_BEditActionPerformed
 
     private void BAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BAddActionPerformed
- String name = TName.getText();
+
+    String name = TName.getText();
     String position = (String) CBPosition.getSelectedItem();
     String room = (String) CBRoom.getSelectedItem();
     String month = (String) CBMonth.getSelectedItem();
@@ -617,12 +633,12 @@ public final class LabSched extends javax.swing.JFrame {
     String semester = (String) CBSemester.getSelectedItem();
     String subject = (String) CBSubject.getSelectedItem();
 
-   if (name.isEmpty() || position == null || yearLevel == null || section == null || subject == null || month == null || week == null || day == null || time == null || semester == null) {
-    JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-} else {
-         DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
-         
-            // Check if the selected laboratory room already has 3 users
+    if (name.isEmpty() || position == null || yearLevel == null || section == null || subject == null || month == null || week == null || day == null || time == null || semester == null) {
+        JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+
+        // Check if the selected laboratory room already has 3 users
         int roomUserCount = 0;
         for (int i = 0; i < model.getRowCount(); i++) {
             String existingRoom = (String) model.getValueAt(i, 7);
@@ -634,66 +650,93 @@ public final class LabSched extends javax.swing.JFrame {
         if (roomUserCount >= 3) {
             JOptionPane.showMessageDialog(this, "This laboratory is full. Please select another laboratory.", "Room Full", JOptionPane.ERROR_MESSAGE);
             return;
-        }  
-       
-    int confirmDialog = JOptionPane.showConfirmDialog(this, "Do you want to add teacher schedule?", "Confirmation", JOptionPane.YES_NO_OPTION);
-    if (confirmDialog == JOptionPane.YES_OPTION) {
-      
-        boolean slotTaken = false;
-        boolean userSubjectConflict = false;
-        boolean userTimeConflict = false;
-        int teacherCountInRoom = 0;
-    
-        // Check for conflicts
-        for (int i = 0; i < model.getRowCount(); i++) {
-            String existingName = (String) model.getValueAt(i, 0);
-            String existingMonth = (String) model.getValueAt(i, 8);
-            String existingWeek = (String) model.getValueAt(i, 9);
-            String existingDay = (String) model.getValueAt(i, 10);
-            String existingTime = (String) model.getValueAt(i, 6);
-            String existingSubject = (String) model.getValueAt(i, 5);
-            String existingSemester = (String) model.getValueAt(i, 3);
-
-            if (name.equals(existingName) && subject.equals(existingSubject)) {
-                userSubjectConflict = true;
-                break;
-            }
-
-            if (name.equals(existingName) && semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
-                userTimeConflict = true;
-                break;
-            }
-
-            if (semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
-                slotTaken = true;
-                break;
-            }
-            Object existingRoom = null;
-            if (room.equals(existingRoom) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay)) {
-                    teacherCountInRoom++;
-                }
         }
 
-        // Handle conflicts
-        // Check if the time slot is the last one (8:00 PM - 9:00 PM)
-                if (time.equals("08:00 PM - 09:00 PM")) {
-                    JOptionPane.showMessageDialog(this, "The time slot is full. Please select another laboratory.", "Time Slot Full", JOptionPane.ERROR_MESSAGE);
-                    // Set the next available time to 8:00 AM - 9:00 AM of the next day
-                    int currentDayIndex = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday").indexOf(day);
-                    int nextDayIndex = (currentDayIndex + 1) % 6;
-                    CBDay.setSelectedIndex(nextDayIndex);
-                    CBTime.setSelectedIndex(0); // Set to "08:00 AM - 09:00 AM"
-                } else {
-                    model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
-                    removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
+        int confirmDialog = JOptionPane.showConfirmDialog(this, "Do you want to add teacher schedule?", "Confirmation", JOptionPane.YES_NO_OPTION);
+        if (confirmDialog == JOptionPane.YES_OPTION) {
+            boolean slotTaken = false;
+            boolean userSubjectConflict = false;
+            boolean userTimeConflict = false;
+            int teacherCountInRoom = 0;
 
-                    clearFields();
+            // Check for conflicts
+            for (int i = 0; i < model.getRowCount(); i++) {
+                String existingName = (String) model.getValueAt(i, 0);
+                String existingMonth = (String) model.getValueAt(i, 8);
+                String existingWeek = (String) model.getValueAt(i, 9);
+                String existingDay = (String) model.getValueAt(i, 10);
+                String existingTime = (String) model.getValueAt(i, 6);
+                String existingSubject = (String) model.getValueAt(i, 5);
+                String existingSemester = (String) model.getValueAt(i, 3);
+
+                if (name.equals(existingName) && subject.equals(existingSubject)) {
+                    userSubjectConflict = true;
+                    break;
                 }
-    }
 
+                if (name.equals(existingName) && semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
+                    userTimeConflict = true;
+                    break;
+                }
 
+                if (semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
+                    slotTaken = true;
+                    break;
+                }
+                Object existingRoom = null;
+                if (room.equals(existingRoom) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay)) {
+                    teacherCountInRoom++;
+                }
+            }
+
+            // Handle conflicts
+            // Check if the time slot is the last one (8:00 PM - 9:00 PM)
+            if (time.equals("08:00 PM - 09:00 PM")) {
+                JOptionPane.showMessageDialog(this, "The time slot is full. Please select another laboratory.", "Time Slot Full", JOptionPane.ERROR_MESSAGE);
+                // Set the next available time to 8:00 AM - 9:00 AM of the next day
+                int currentDayIndex = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday").indexOf(day);
+                int nextDayIndex = (currentDayIndex + 1) % 6;
+                CBDay.setSelectedIndex(nextDayIndex);
+                CBTime.setSelectedIndex(0); // Set to "08:00 AM - 09:00 AM"
+            } else {
+                model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
+                removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
+
+                // Save data to database
+                saveDataToDatabase(name, position, room, month, week, day, time, yearLevel, section, semester, subject);
+
+                clearFields();
+            }
+        }
     }
+}
+
+private void saveDataToDatabase(String name, String position, String room, String month, String week, String day, String time, String yearLevel, String section, String semester, String subject) {
+    String insertSQL = "INSERT INTO lab (name, position, room, month, week, day, time, year_level, section, semester, subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
+
+        pstmt.setString(1, name);
+        pstmt.setString(2, position);
+        pstmt.setString(3, room);
+        pstmt.setString(4, month);
+        pstmt.setString(5, week);
+        pstmt.setString(6, day);
+        pstmt.setString(7, time);
+        pstmt.setString(8, yearLevel);
+        pstmt.setString(9, section);
+        pstmt.setString(10, semester);
+        pstmt.setString(11, subject);
+
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error saving data to database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
     }
+}
+
+    
+    
     private void suggestAlternativeRoom() {
     String[] rooms = {"Laboratory 1", "Laboratory 2A", "Laboratory 2B", "Laboratory 3", "Laboratory 4", "Room 6", "Smart Classroom", "ICTC Lobby", "AVR"};
     DefaultComboBoxModel<String> roomModel = new DefaultComboBoxModel<>(rooms);
@@ -1012,7 +1055,11 @@ private void clearFields() {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-            new LabSched().setVisible(true);
+            try {
+                new LabSched().setVisible(true);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(LabSched.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
     }
 
