@@ -1,4 +1,7 @@
 import javax.swing.*;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -7,22 +10,26 @@ import java.sql.DriverManager;
 
 
 public class UserSignup extends javax.swing.JFrame {
- private static final String URL = "jdbc:mysql://localhost:3306/labsched?zeroDateTimeBehavior=CONVERT_TO_NULL";
+ private static final String URL = "jdbc:mysql://localhost/labsched";
     private static final String USER = "root";
     private static final String PASSWORD = "12345";
+    
+    Connection conn;
     public UserSignup() {
         initComponents();
+        Connect ();
     }
    
 
-    public static Connection connect() {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
+ public void Connect(){
+         try {
+           Class.forName("com.mysql.jdbc.Driver");
+           conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");
+       } catch (ClassNotFoundException | SQLException ex) {
+           Logger.getLogger(UserSignup.class.getName()).log(Level.SEVERE, null, ex);
+       }
+    
+       
    
 
 }
@@ -155,33 +162,40 @@ public class UserSignup extends javax.swing.JFrame {
 
     private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed
       
-String username = TEmail.getText();
-        String password = new String(PPassword.getPassword());
-           if (!username.endsWith("@gmail.com")) {
-    JOptionPane.showMessageDialog(this, "Please enter a valid Gmail address.");
+String userEmail = TEmail.getText();
+      String userPassword = new String(PPassword.getPassword());
+      
+
+        // Check if any field is empty
+if (userEmail.isEmpty() || userPassword.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
 } else {
+        try {
+            
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO users (username, password) VALUES ( ?, ?)");
+            ps.setString(1, userEmail);
+            ps.setString(2, userPassword);
 
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-        try (Connection conn = UserSignup.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            int rowsInserted = ps.executeUpdate();
+            if (rowsInserted > 0) {
+                JOptionPane.showMessageDialog(this, "Sign up successful!");
+                 UserLogin loginForm = new UserLogin();
+                 loginForm.setVisible(true);
+                 this.dispose();
+                
+                TEmail.setText("");
+                PPassword.setText("");
 
-            pstmt.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Sign up successful!");
-            new UserLogin().setVisible(true);
-            dispose();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(UserSignup.class.getName()).log(Level.SEVERE, null, ex);
         }
-   
-
-
-           }
-
-
+}
     }//GEN-LAST:event_BSignupActionPerformed
 
     /**

@@ -1,3 +1,6 @@
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,24 +10,27 @@ import java.sql.DriverManager;
 
 
 public class UserLogin extends javax.swing.JFrame {
-  private static final String URL = "jdbc:mysql://localhost:3306/labsched?zeroDateTimeBehavior=CONVERT_TO_NULL";
-    private static final String USER = "root";
-    private static final String PASSWORD = "12345";
+
+    
+    Connection conn;
+    
     public UserLogin() {
         initComponents();
+        Connect();
     }
     
 
-    public static Connection connect() {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
-    
-}
+     public void Connect(){
+       try {
+           Class.forName("com.mysql.jdbc.Driver");
+           conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");
+       } catch (ClassNotFoundException ex) {
+           Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
+       } catch (SQLException ex) {
+           Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
+       }
+        
+    }
     
 
     /**
@@ -85,6 +91,11 @@ public class UserLogin extends javax.swing.JFrame {
         BSignup.setBackground(new java.awt.Color(0, 204, 204));
         BSignup.setForeground(new java.awt.Color(255, 255, 255));
         BSignup.setText("Sign Up");
+        BSignup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BSignupActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -167,36 +178,54 @@ public class UserLogin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BLoginActionPerformed
- String username = TEmail.getText();
-        String password = new String(PPassword.getPassword());
+  String userEmail = TEmail.getText();
+            String userPassword = new String(PPassword.getPassword());
 
-        
-        if (!username.endsWith("@gmail.com")) {
-    JOptionPane.showMessageDialog(this, "Please enter a valid Gmail address.");
-} else {
-        
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    if (authenticate(userEmail, userPassword)) {
+        // If login is successful, close the success message dialog
+        JOptionPane.showMessageDialog(this, "Login successful!");
 
-        try (Connection conn = UserLogin.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Close the login frame or panel
+        setVisible(false); // Assuming this code is inside your login frame or panel
 
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
+        // Show the dashboard page
+        Home home = new Home(); 
+        home.setVisible(true);
 
-            ResultSet rs = pstmt.executeQuery();
+        // Optionally, you can clear the input fields after successful login
+        TEmail.setText("");
+        PPassword.setText("");
+    } else {
+        // If login fails, show an error dialog
+        JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-            if (rs.next()) {
-                JOptionPane.showMessageDialog(this, "Login successful!");
-new LabSched().setVisible(true);
-            dispose();            } else {
-                JOptionPane.showMessageDialog(this, "Invalid username or password.");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        }
+    }//GEN-LAST:event_loginBtnActionPerformed
+    
+    
+    private boolean authenticate(String userEmail, String userPassword) {
+ 
+    // Implement your actual authentication logic here, such as querying the database
+    try {
+        Connection con = DriverManager.getConnection("jdbc:mysql://localhost/labsched", "root", "12345");
+        PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
+        ps.setString(1, userEmail);
+        ps.setString(2, userPassword);
+        ResultSet rs = ps.executeQuery();
+        return rs.next(); // Return true if there is at least one row in the result set (i.e., authentication successful)
+    } catch (SQLException ex) {
+        java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        return false; // Return false if an exception occurs (i.e., authentication failed)
+    }
+    
 
     }//GEN-LAST:event_BLoginActionPerformed
+
+    private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed
+        UserSignup signUp = new UserSignup();
+        signUp.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_BSignupActionPerformed
 
     /**
      * @param args the command line arguments
