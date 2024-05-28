@@ -177,49 +177,52 @@ public class UserLogin extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void BLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BLoginActionPerformed
-  String userEmail = TEmail.getText();
-            String userPassword = new String(PPassword.getPassword());
+    private void BLoginActionPerformed(java.awt.event.ActionEvent evt) throws ClassNotFoundException {                                       
+    String userEmail = TEmail.getText();
+    String userPassword = new String(PPassword.getPassword());
 
-    if (authenticate(userEmail, userPassword)) {
-        // If login is successful, close the success message dialog
-        JOptionPane.showMessageDialog(this, "Login successful!");
-
-        // Close the login frame or panel
-        setVisible(false); // Assuming this code is inside your login frame or panel
-
-        // Show the dashboard page
-        Home home = new Home(); 
-        home.setVisible(true);
-
-        // Optionally, you can clear the input fields after successful login
-        TEmail.setText("");
-        PPassword.setText("");
-    } else {
-        // If login fails, show an error dialog
-        JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    }//GEN-LAST:event_loginBtnActionPerformed
+    LabSched dashboardPanel = new LabSched();    
+    adminPanel Panel = new adminPanel();
     
-    
-    private boolean authenticate(String userEmail, String userPassword) {
- 
-    // Implement your actual authentication logic here, such as querying the database
+
     try {
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost/labsched", "root", "12345");
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
+        PreparedStatement ps = (PreparedStatement) conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
         ps.setString(1, userEmail);
         ps.setString(2, userPassword);
         ResultSet rs = ps.executeQuery();
-        return rs.next(); // Return true if there is at least one row in the result set (i.e., authentication successful)
+        if (rs.next()) {
+            String userStatus = rs.getString("status"); // Assuming the column name for status is "status"
+
+            // If login is successful, close the success message dialog
+            JOptionPane.showMessageDialog(this, "Login successful!");
+
+            // Close the login frame or panel
+            setVisible(false); // Assuming this code is inside your login frame or panel
+
+            if (userStatus.equalsIgnoreCase("admin")) { // Assuming the status is either "admin" or "user"
+                // Show the dashboard panel
+                Panel.setVisible(true);
+            } else { // Assuming the status is either "admin" or "user"
+                // Show the user panel
+                dashboardPanel.setVisible(true);
+            }
+
+            // Optionally, you can clear the input fields after successful login
+            TEmail.setText("");
+            PPassword.setText("");
+        } else {
+            // If login fails, show an error dialog
+            JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     } catch (SQLException ex) {
         java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        return false; // Return false if an exception occurs (i.e., authentication failed)
     }
     
-
-    }//GEN-LAST:event_BLoginActionPerformed
+    }                                        
+    
+    
+    
+                                  
 
     private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed
         UserSignup signUp = new UserSignup();
