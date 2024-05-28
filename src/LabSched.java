@@ -119,38 +119,37 @@ public final class LabSched extends javax.swing.JFrame {
     
     }
     
-     private void loadTableData() {
-       DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
-        model.setRowCount(0); // Clear existing data
+    private void loadTableData() {
+    DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+    model.setRowCount(0); // Clear existing data
 
-        if (con != null) {
-            try {
-                String query = "SELECT * FROM lab";
-                try (PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+    if (con != null) {
+        try {
+            String query = "SELECT * FROM lab";
+            try (PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+                
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String position = rs.getString("position");
+                    String semester = rs.getString("semester");
+                    String yearLevel = rs.getString("year_level");
+                    String section = rs.getString("section");
+                    String subject = rs.getString("subject");
+                    String time = rs.getString("time");
+                    String room = rs.getString("room");
+                    String month = rs.getString("month");
+                    String week = rs.getString("week");
+                    String day = rs.getString("day");
+                    String status = rs.getString("status");
                     
-                    while (rs.next()) {
-                        String name = rs.getString("name");
-                        String position = rs.getString("position");
-                        String semester = rs.getString("semester");
-                        String yearLevel = rs.getString("year_level");
-                        String section = rs.getString("section");
-                        String subject = rs.getString("subject");
-                        String time = rs.getString("time");
-                        String room = rs.getString("room");
-                        String month = rs.getString("month");
-                        String week = rs.getString("week");
-                        String day = rs.getString("day");
-                        
-                        
-                        
-                        model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
-                    }
+                    model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
                 }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, ex.getMessage());
             }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
         }
     }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -208,11 +207,11 @@ public final class LabSched extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Position", "Semester", "Year Level", "Section", "Subject", "Time", "Room", "Month", "Week", "Day"
+                "Name", "Position", "Semester", "Year Level", "Section", "Subject", "Time", "Room", "Month", "Week", "Day", "Status"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -233,6 +232,7 @@ public final class LabSched extends javax.swing.JFrame {
             LabTable.getColumnModel().getColumn(8).setPreferredWidth(80);
             LabTable.getColumnModel().getColumn(9).setPreferredWidth(80);
             LabTable.getColumnModel().getColumn(10).setPreferredWidth(80);
+            LabTable.getColumnModel().getColumn(11).setPreferredWidth(150);
         }
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -322,7 +322,7 @@ public final class LabSched extends javax.swing.JFrame {
 
         BEdit.setBackground(new java.awt.Color(204, 102, 0));
         BEdit.setForeground(new java.awt.Color(255, 255, 255));
-        BEdit.setText("edit");
+        BEdit.setText("Edit");
         BEdit.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         BEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -400,12 +400,14 @@ public final class LabSched extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(BPreview)
                         .addGap(79, 79, 79)
-                        .addComponent(BPrint))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1214, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(BPrint)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addContainerGap())))
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 775, Short.MAX_VALUE)
                 .addComponent(jLabel12)
                 .addGap(607, 607, 607))
         );
@@ -511,14 +513,14 @@ public final class LabSched extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(635, Short.MAX_VALUE)
+                .addContainerGap(761, Short.MAX_VALUE)
                 .addComponent(jLabel13)
                 .addGap(549, 549, 549)
                 .addComponent(BLogout)
                 .addGap(24, 24, 24))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1531, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1653, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -621,7 +623,7 @@ public final class LabSched extends javax.swing.JFrame {
 
     private void BAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BAddActionPerformed
 
-    String name = TName.getText();
+   String name = TName.getText();
     String position = (String) CBPosition.getSelectedItem();
     String room = (String) CBRoom.getSelectedItem();
     String month = (String) CBMonth.getSelectedItem();
@@ -654,50 +656,10 @@ public final class LabSched extends javax.swing.JFrame {
 
         int confirmDialog = JOptionPane.showConfirmDialog(this, "Do you want to add teacher schedule?", "Confirmation", JOptionPane.YES_NO_OPTION);
         if (confirmDialog == JOptionPane.YES_OPTION) {
-            boolean slotTaken = false;
-            boolean userSubjectConflict = false;
-            boolean userTimeConflict = false;
-            int teacherCountInRoom = 0;
+            boolean slotTaken = checkIfSlotTaken(room, month, week, day, time, semester);
 
-            // Check for conflicts
-            for (int i = 0; i < model.getRowCount(); i++) {
-                String existingName = (String) model.getValueAt(i, 0);
-                String existingMonth = (String) model.getValueAt(i, 8);
-                String existingWeek = (String) model.getValueAt(i, 9);
-                String existingDay = (String) model.getValueAt(i, 10);
-                String existingTime = (String) model.getValueAt(i, 6);
-                String existingSubject = (String) model.getValueAt(i, 5);
-                String existingSemester = (String) model.getValueAt(i, 3);
-
-                if (name.equals(existingName) && subject.equals(existingSubject)) {
-                    userSubjectConflict = true;
-                    break;
-                }
-
-                if (name.equals(existingName) && semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
-                    userTimeConflict = true;
-                    break;
-                }
-
-                if (semester.equals(existingSemester) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay) && time.equals(existingTime)) {
-                    slotTaken = true;
-                    break;
-                }
-                Object existingRoom = null;
-                if (room.equals(existingRoom) && month.equals(existingMonth) && week.equals(existingWeek) && day.equals(existingDay)) {
-                    teacherCountInRoom++;
-                }
-            }
-
-            // Handle conflicts
-            // Check if the time slot is the last one (8:00 PM - 9:00 PM)
-            if (time.equals("08:00 PM - 09:00 PM")) {
-                JOptionPane.showMessageDialog(this, "The time slot is full. Please select another laboratory.", "Time Slot Full", JOptionPane.ERROR_MESSAGE);
-                // Set the next available time to 8:00 AM - 9:00 AM of the next day
-                int currentDayIndex = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday").indexOf(day);
-                int nextDayIndex = (currentDayIndex + 1) % 6;
-                CBDay.setSelectedIndex(nextDayIndex);
-                CBTime.setSelectedIndex(0); // Set to "08:00 AM - 09:00 AM"
+            if (slotTaken) {
+                JOptionPane.showMessageDialog(this, "The selected slot is already taken. Please choose a different time or room.", "Slot Taken", JOptionPane.ERROR_MESSAGE);
             } else {
                 model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
                 removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
@@ -706,13 +668,39 @@ public final class LabSched extends javax.swing.JFrame {
                 saveDataToDatabase(name, position, room, month, week, day, time, yearLevel, section, semester, subject);
 
                 clearFields();
+                loadTableData(); // Refresh the table data to show the newly added entry
             }
         }
     }
 }
+    
+    private boolean checkIfSlotTaken(String room, String month, String week, String day, String time, String semester) {
+    String checkSQL = "SELECT COUNT(*) FROM lab WHERE room = ? AND month = ? AND week = ? AND day = ? AND time = ? AND semester = ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(checkSQL)) {
+
+        pstmt.setString(1, room);
+        pstmt.setString(2, month);
+        pstmt.setString(3, week);
+        pstmt.setString(4, day);
+        pstmt.setString(5, time);
+        pstmt.setString(6, semester);
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0; // Return true if there is already an entry with the same details
+            }
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error checking slot availability: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    }
+    return false;
+}
 
 private void saveDataToDatabase(String name, String position, String room, String month, String week, String day, String time, String yearLevel, String section, String semester, String subject) {
-    String insertSQL = "INSERT INTO lab (name, position, room, month, week, day, time, year_level, section, semester, subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    String insertSQL = "INSERT INTO lab (name, position, room, month, week, day, time, year_level, section, semester, subject, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     try (Connection conn = DatabaseConnection.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
@@ -728,6 +716,7 @@ private void saveDataToDatabase(String name, String position, String room, Strin
         pstmt.setString(9, section);
         pstmt.setString(10, semester);
         pstmt.setString(11, subject);
+        pstmt.setString(12, "Pending");
 
         pstmt.executeUpdate();
     } catch (SQLException e) {
