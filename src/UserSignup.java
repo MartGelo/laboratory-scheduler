@@ -51,6 +51,7 @@ public class UserSignup extends javax.swing.JFrame {
         BSignup = new javax.swing.JButton();
         BLogin = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        CBShowpassword = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -98,6 +99,13 @@ public class UserSignup extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Email Address:");
 
+        CBShowpassword.setText("Show password");
+        CBShowpassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CBShowpasswordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -116,7 +124,10 @@ public class UserSignup extends javax.swing.JFrame {
                             .addComponent(jLabel3))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(BSignup)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(BSignup)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(CBShowpassword))
                             .addComponent(TEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
                             .addComponent(PPassword))))
                 .addContainerGap(137, Short.MAX_VALUE))
@@ -139,7 +150,9 @@ public class UserSignup extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(PPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(27, 27, 27)
-                .addComponent(BSignup)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(BSignup)
+                    .addComponent(CBShowpassword))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -192,6 +205,9 @@ try {
 
             TEmail.setText("");
             PPassword.setText("");
+                // Redirect to login page
+            this.dispose(); // Close the current sign-up window
+            new UserLogin().setVisible(true); // Open the login form
             
         } else {
             JOptionPane.showMessageDialog(this, "Sign up failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -208,6 +224,18 @@ try {
         login.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_BLoginActionPerformed
+
+    private void CBShowpasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CBShowpasswordActionPerformed
+// Check if the checkbox is selected
+    if (CBShowpassword.isSelected()) {
+        // Show the password
+        PPassword.setEchoChar((char) 0); // Set the echo char to 0 to display the password in plain text
+    } else {
+        // Hide the password
+        PPassword.setEchoChar('\u25cf'); // Reset the echo char to default (bullet character) to hide the password
+    }
+
+    }//GEN-LAST:event_CBShowpasswordActionPerformed
 
     /**
      * @param args the command line arguments
@@ -241,6 +269,7 @@ try {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BLogin;
     private javax.swing.JButton BSignup;
+    private javax.swing.JCheckBox CBShowpassword;
     private javax.swing.JPasswordField PPassword;
     private javax.swing.JTextField TEmail;
     private javax.swing.JLabel jLabel1;

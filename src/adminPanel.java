@@ -1,6 +1,10 @@
 
-import java.awt.Desktop;
+import com.mysql.jdbc.Statement;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -8,25 +12,25 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.sql.ResultSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JTable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
+
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -42,10 +46,10 @@ public class adminPanel extends javax.swing.JFrame {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "12345";
     private Connection conn;
-    private javax.swing.JComboBox<String> CBRoom;
 
     /**
      * Creates new form adminPanel
+     * @throws java.lang.ClassNotFoundException
      */
     public adminPanel() throws ClassNotFoundException {
         initComponents();
@@ -54,6 +58,7 @@ public class adminPanel extends javax.swing.JFrame {
     
     
 }
+      
     
     private void connectToDatabase() throws ClassNotFoundException {
            try {
@@ -67,34 +72,52 @@ public class adminPanel extends javax.swing.JFrame {
     
     
  private void populateLabTable() {
-        try {
-            String query = "SELECT * FROM lab"; // Assuming your table name is lab_table
-            PreparedStatement statement = conn.prepareStatement(query);
-            ResultSet resultSet = statement.executeQuery();
+    try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lab");
+         ResultSet rs = stmt.executeQuery()) {
+        DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+        while (rs.next()) {
+            String name = rs.getString("name");
+            String position = rs.getString("position");
+            String semester = rs.getString("semester");
+            String yearLevel = rs.getString("year_level");
+            String section = rs.getString("section");
+            String subject = rs.getString("subject");
+            String time = rs.getString("time");
+            String room = rs.getString("room");
+            String month = rs.getString("month");
+            String week = rs.getString("week");
+            String day = rs.getString("day");
+            String status = rs.getString("status");
 
-            // Populate the table model with data from the result set
-            DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
-            model.setRowCount(0); // Clear existing data
-            while (resultSet.next()) {
-                Object[] row = new Object[]{
-                    resultSet.getString("name"),
-                    resultSet.getString("position"),
-                    resultSet.getString("semester"),
-                    resultSet.getString("year_level"),
-                    resultSet.getString("section"),
-                    resultSet.getString("subject"),
-                    resultSet.getString("time"),
-                    resultSet.getString("room"),
-                    resultSet.getString("month"),
-                    resultSet.getString("week"),
-                    resultSet.getString("day"),
-                    resultSet.getString("status")
-                };
-                model.addRow(row);
-            }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Failed to fetch data from the database: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
         }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+}
+
+   
+    private Map<String, Map<String, Integer>> getColumnCounts() {
+        Map<String, Map<String, Integer>> columnCounts = new HashMap<>();
+        try (PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM lab")) {
+            ResultSet resultSet = pstmt.executeQuery();
+            java.sql.ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            while (resultSet.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    String columnValue = resultSet.getString(i);
+                    if (columnValue != null && !columnValue.isEmpty()) {
+                        columnCounts.computeIfAbsent(columnName, k -> new HashMap<>())
+                                .compute(columnValue, (k, v) -> v == null ? 1 : v + 1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return columnCounts;
     }
 
 
@@ -117,6 +140,11 @@ public class adminPanel extends javax.swing.JFrame {
         acceptbtn = new javax.swing.JButton();
         declinebtn = new javax.swing.JButton();
         deletebtn = new javax.swing.JButton();
+        BList = new javax.swing.JButton();
+        BPreview = new javax.swing.JButton();
+        BSearch = new javax.swing.JButton();
+        TSearch = new javax.swing.JTextField();
+        BRefresh = new javax.swing.JButton();
         BLogout = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
 
@@ -161,6 +189,14 @@ public class adminPanel extends javax.swing.JFrame {
         });
         LabTable.setRowHeight(40);
         jScrollPane1.setViewportView(LabTable);
+        if (LabTable.getColumnModel().getColumnCount() > 0) {
+            LabTable.getColumnModel().getColumn(1).setPreferredWidth(170);
+            LabTable.getColumnModel().getColumn(4).setPreferredWidth(70);
+            LabTable.getColumnModel().getColumn(5).setPreferredWidth(210);
+            LabTable.getColumnModel().getColumn(6).setPreferredWidth(200);
+            LabTable.getColumnModel().getColumn(7).setPreferredWidth(200);
+            LabTable.getColumnModel().getColumn(11).setPreferredWidth(70);
+        }
 
         BPrint.setBackground(new java.awt.Color(204, 102, 0));
         BPrint.setForeground(new java.awt.Color(255, 255, 255));
@@ -201,6 +237,34 @@ public class adminPanel extends javax.swing.JFrame {
             }
         });
 
+        BList.setText("List");
+        BList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BListActionPerformed(evt);
+            }
+        });
+
+        BPreview.setText("Preview");
+        BPreview.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BPreviewActionPerformed(evt);
+            }
+        });
+
+        BSearch.setText("Search");
+        BSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BSearchActionPerformed(evt);
+            }
+        });
+
+        BRefresh.setText("Refresh");
+        BRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BRefreshActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -209,12 +273,20 @@ public class adminPanel extends javax.swing.JFrame {
                 .addComponent(jScrollPane1)
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(125, 125, 125)
+                .addComponent(BSearch)
+                .addGap(12, 12, 12)
+                .addComponent(TSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(BRefresh)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel12)
                         .addGap(526, 526, 526))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(BPreview)
+                        .addGap(33, 33, 33)
                         .addComponent(BPrint)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(acceptbtn)
@@ -222,22 +294,35 @@ public class adminPanel extends javax.swing.JFrame {
                         .addComponent(declinebtn)
                         .addGap(18, 18, 18)
                         .addComponent(deletebtn)
-                        .addGap(489, 489, 489))))
+                        .addGap(18, 18, 18)
+                        .addComponent(BList)
+                        .addGap(396, 396, 396))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 653, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(BPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(acceptbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(declinebtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(deletebtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel12)
-                .addGap(38, 38, 38))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(BPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(acceptbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(declinebtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(deletebtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(BList)
+                            .addComponent(BPreview))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel12)
+                        .addGap(38, 38, 38))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(44, 44, 44)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(BSearch)
+                            .addComponent(TSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(BRefresh))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         BLogout.setBackground(new java.awt.Color(204, 102, 0));
@@ -275,7 +360,7 @@ public class adminPanel extends javax.swing.JFrame {
                 .addGap(24, 24, 24))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1521, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1522, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -309,8 +394,9 @@ public class adminPanel extends javax.swing.JFrame {
 
         // Check the user's response
         if (response == JOptionPane.YES_OPTION) {
-            // Perform logout logic
-            dispose();
+UserLogin userLogin = new UserLogin();
+    userLogin.setVisible(true);
+    dispose();
         }
     }//GEN-LAST:event_BLogoutActionPerformed
 
@@ -360,23 +446,46 @@ public class adminPanel extends javax.swing.JFrame {
     }//GEN-LAST:event_acceptbtnActionPerformed
 
     private void deletebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletebtnActionPerformed
-         int selectedRow = LabTable.getSelectedRow();
+   int selectedRow = LabTable.getSelectedRow();
     if (selectedRow != -1) {
         String status = LabTable.getValueAt(selectedRow, 11).toString(); // Get the status from the selected row
 
         // Check if the status is "Accepted"
         if (status.equals("Accepted")) {
             JOptionPane.showMessageDialog(this, "Cannot delete record with status 'Accepted'", "Deletion Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            // If the status is not "Accepted", proceed with deletion
-            DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
-            model.removeRow(selectedRow); // Remove the selected row from the JTable
-            
-            // You can add code here to update the status in the database if needed
+        } else if (status.equals("Pending")) {
+            // Ask for user confirmation before proceeding with deletion
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this record with status 'Pending'?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                // If the user confirms, proceed with deletion
+               
+                String name = (String) LabTable.getValueAt(selectedRow, 0);
+
+                // Delete the record from the database
+                deleteRecordFromDatabase(name);
+                
+                // Remove the selected row from the JTable
+                DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+                model.removeRow(selectedRow);
+            }
         }
     } else {
         JOptionPane.showMessageDialog(this, "Please select a row to delete", "Selection Error", JOptionPane.ERROR_MESSAGE);
     }
+    }
+   private void deleteRecordFromDatabase(String name) {
+       try {
+       String deleteSQL = "DELETE FROM lab WHERE name = ?";
+         try (PreparedStatement pstmt = (PreparedStatement) conn.prepareStatement(deleteSQL)) {
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+            
+            System.out.println("Row deleted from the database.");
+         }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error deleting data from database: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+             ex.printStackTrace();
+}  
     }//GEN-LAST:event_deletebtnActionPerformed
 private void printTable(JTable table, String room) throws PrinterException {
     PrinterJob printerJob = PrinterJob.getPrinterJob();
@@ -429,6 +538,247 @@ private void printTable(JTable table) {
     }
     }//GEN-LAST:event_BPrintActionPerformed
 
+    private void BListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BListActionPerformed
+             Map<String, Map<String, Integer>> columnCounts = getColumnCounts();
+
+    StringBuilder result = new StringBuilder();
+    result.append("<html><body>");
+    
+    for (Map.Entry<String, Map<String, Integer>> entry : columnCounts.entrySet()) {
+        String columnName = entry.getKey();
+        // Skip the "id" field
+        if ("id".equalsIgnoreCase(columnName)) {
+            continue;
+        }
+        columnName = "<b>" + capitalizeFirstLetter(columnName) + "</b>"; // Making the column name bold
+        Map<String, Integer> counts = entry.getValue();
+        int totalCount = counts.values().stream().mapToInt(Integer::intValue).sum();
+        
+        // Column name and total count
+        result.append("<p>").append(columnName).append(": (").append(totalCount).append(")</p>");
+        
+        // Unordered list for specific counts
+        result.append("<ul>");
+        for (Map.Entry<String, Integer> countEntry : counts.entrySet()) {
+            String value = capitalizeFirstLetter(countEntry.getKey());
+            int count = countEntry.getValue();
+            result.append("<li>").append(value).append(": ").append(count).append("</li>");
+        }
+        result.append("</ul>");
+    }
+    result.append("</body></html>");
+
+    // Create a JLabel to hold the HTML content
+    JLabel label = new JLabel(result.toString());
+
+    // Create a JScrollPane to make the content scrollable
+    JScrollPane scrollPane = new JScrollPane(label);
+    scrollPane.setPreferredSize(new Dimension(400, 300)); // Set preferred size for the scroll pane
+
+    JOptionPane.showMessageDialog(null, scrollPane, "Column Counts", JOptionPane.INFORMATION_MESSAGE);
+}
+
+private String capitalizeFirstLetter(String str) {
+    return str.substring(0, 1).toUpperCase() + str.substring(1);
+
+    }//GEN-LAST:event_BListActionPerformed
+
+    private void BPreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BPreviewActionPerformed
+  // Create the preview frame
+JFrame previewFrame = new JFrame("Print Preview");
+previewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+previewFrame.setLayout(new BorderLayout());
+
+// Create the print preview panel
+JPanel printPreviewPanel = new JPanel(new BorderLayout());
+
+// Create the top table panel
+JPanel topTablePanel = new JPanel() {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // Add space between the title and the table
+        int tableStartY = 0;
+
+        // Set font for the additional rows
+        Font additionalRowFont = new Font("Arial", Font.BOLD, 16);
+        g.setFont(additionalRowFont);
+        FontMetrics fm = g.getFontMetrics(additionalRowFont);
+
+        // Draw the additional rows
+        int additionalRowY = tableStartY + 20;
+        String[] additionalTexts = {"LABORATORY SCHEDULE", "(Shared / Alternating Utilization)", "2nd Semester, SY 2023-2024", "Week A"};
+        for (String text : additionalTexts) {
+            int textWidth = fm.stringWidth(text);
+            int textX = (getWidth() - textWidth) / 2; // Center horizontally
+            g.drawString(text, textX, additionalRowY);
+            additionalRowY += 20; // Adjust spacing
+        }
+
+        // Set font for the table headers (days and times)
+        Font headerFont = new Font("Arial", Font.BOLD, 12);
+        g.setFont(headerFont);
+
+        // Draw the table
+        int rowHeight = 50;
+        int colWidth = 100;
+        int numRows = 14;
+        int numCols = 8;
+        String[] days = {"Time", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        String[] times = {"8:00AM - 9:00AM", "9:00AM - 10:00AM", "10:00AM - 11:00AM", "11:00AM - 12:00PM",
+                          "12:00PM - 1:00PM", "1:00PM - 2:00PM", "2:00PM - 3:00PM", "3:00PM - 4:00PM",
+                          "4:00PM - 5:00PM", "5:00PM - 6:00PM", "6:00PM - 7:00PM", "7:00PM - 8:00PM",
+                          "8:00PM - 9:00PM"};
+
+        // Draw column headers
+        for (int col = 0; col < numCols; col++) {
+            g.drawRect(col * colWidth, additionalRowY + 70, colWidth, rowHeight);
+            g.drawString(days[col], col * colWidth + 10, additionalRowY + 70 + rowHeight / 2);
+        }
+
+        // Set font for the time column
+        Font timeFont = new Font("Arial", Font.BOLD, 10);
+        g.setFont(timeFont);
+
+        // Draw rows
+        for (int row = 0; row < numRows; row++) {
+            g.drawRect(0, tableStartY + additionalRowY + 70 + row * rowHeight, colWidth, rowHeight);
+            if (row > 0) {
+                g.drawString(times[row - 1], 10, tableStartY + additionalRowY + 70 + row * rowHeight + rowHeight / 2);
+            }
+        }
+
+        // Draw the rest of the table
+        for (int row = 1; row < numRows; row++) {
+            for (int col = 1; col < numCols; col++) {
+                g.drawRect(col * colWidth, tableStartY + additionalRowY + 70 + row * rowHeight, colWidth, rowHeight);
+            }
+        }
+    }
+};
+
+// Set preferred size of the top table panel
+topTablePanel.setPreferredSize(new Dimension(800, 500)); // Adjust as needed
+
+// Create the bottom table panel (similar to the top table panel)
+JPanel bottomTablePanel = new JPanel() {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        // Write the code for the bottom table here, similar to the top table panel
+    }
+};
+
+// Set preferred size of the bottom table panel
+bottomTablePanel.setPreferredSize(new Dimension(800, 500)); // Adjust as needed
+
+// Add the top and bottom table panels to the print preview panel
+printPreviewPanel.add(topTablePanel, BorderLayout.NORTH);
+printPreviewPanel.add(bottomTablePanel, BorderLayout.SOUTH);
+
+// Create the button panel
+JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+JButton printButton = new JButton("Print");
+buttonPanel.add(printButton);
+
+// Add the print preview panel and button panel to the preview frame
+previewFrame.add(printPreviewPanel, BorderLayout.CENTER);
+previewFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+// Set frame properties
+previewFrame.setSize(800, 1000); // Legal size: 8.5 x 14 inches
+previewFrame.setLocationRelativeTo(null); // Center the frame
+previewFrame.setVisible(true);
+    }//GEN-LAST:event_BPreviewActionPerformed
+
+    private void BRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BRefreshActionPerformed
+    refreshTable();
+
+
+    }//GEN-LAST:event_BRefreshActionPerformed
+
+    private void BSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSearchActionPerformed
+ String searchText = TSearch.getText();
+    if (!searchText.isEmpty()) {
+        searchInDatabase(searchText);
+    } else {
+        JOptionPane.showMessageDialog(this, "Please enter a search query.", "Search Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private void searchInDatabase(String searchText) {
+    String searchSQL = "SELECT * FROM lab WHERE name LIKE ? OR position LIKE ? OR semester LIKE ? OR year_level LIKE ? OR section LIKE ? OR subject LIKE ? OR time LIKE ? OR room LIKE ? OR month LIKE ? OR week LIKE ? OR day LIKE ? OR status LIKE ?";
+     try (Connection conn = LabSched.DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(searchSQL)) {
+            String searchPattern = "%" + searchText + "%";
+            for (int i = 1; i <= 12; i++) {
+                pstmt.setString(i, searchPattern);
+            }
+        ResultSet rs = pstmt.executeQuery();
+        DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        while (rs.next()) {
+            String name = rs.getString("name");
+            String position = rs.getString("position");
+            String semester = rs.getString("semester");
+            String yearLevel = rs.getString("year_level");
+            String section = rs.getString("section");
+            String subject = rs.getString("subject");
+            String time = rs.getString("time");
+            String room = rs.getString("room");
+            String month = rs.getString("month");
+            String week = rs.getString("week");
+            String day = rs.getString("day");
+            String status = rs.getString("status");
+
+            model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
+        }
+                TSearch.setText("");
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error searching database: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+
+
+    }//GEN-LAST:event_BSearchActionPerformed
+
+       
+private void refreshTable() {
+    // Logic to refresh the table with the latest data from the database
+    try (Connection conn = LabSched.DatabaseConnection.getConnection();
+         Statement stmt = (Statement) conn.createStatement()) {
+        String sql = "SELECT * FROM lab";
+        ResultSet rs = stmt.executeQuery(sql);
+        
+        DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        while (rs.next()) {
+            String name = rs.getString("name");
+            String position = rs.getString("position");
+            String semester = rs.getString("semester");
+            String yearLevel = rs.getString("year_level");
+            String section = rs.getString("section");
+            String subject = rs.getString("subject");
+            String time = rs.getString("time");
+            String room = rs.getString("room");
+            String month = rs.getString("month");
+            String week = rs.getString("week");
+            String day = rs.getString("day");
+            String status = rs.getString("status");
+
+            model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error refreshing table: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+    
     /**
      * @param args the command line arguments
      */
@@ -467,9 +817,14 @@ private void printTable(JTable table) {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BList;
     private javax.swing.JButton BLogout;
+    private javax.swing.JButton BPreview;
     private javax.swing.JButton BPrint;
+    private javax.swing.JButton BRefresh;
+    private javax.swing.JButton BSearch;
     private javax.swing.JTable LabTable;
+    private javax.swing.JTextField TSearch;
     private javax.swing.JButton acceptbtn;
     private javax.swing.JButton declinebtn;
     private javax.swing.JButton deletebtn;

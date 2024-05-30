@@ -73,7 +73,11 @@
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="BSignup" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="BSignup" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Component id="CBShowpassword" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <Component id="TEmail" alignment="0" pref="404" max="32767" attributes="0"/>
                               <Component id="PPassword" alignment="0" max="32767" attributes="0"/>
                           </Group>
@@ -104,7 +108,10 @@
                       <Component id="PPassword" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
-                  <Component id="BSignup" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="BSignup" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="CBShowpassword" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace pref="59" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -210,6 +217,14 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Email Address:"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="CBShowpassword">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Show password"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="CBShowpasswordActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
