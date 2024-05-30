@@ -1,6 +1,10 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.util.prefs.Preferences;
+import java.awt.event.*;
 
 
 
@@ -29,7 +34,112 @@ Preferences preferences = Preferences.userNodeForPackage(this.getClass());
         Connect();
     }
     
+public class LoginForm {
+    private JTextField TEmail;
+    private JPasswordField PPassword;
+    private JCheckBox CBRemember;
+    private JButton loginButton;
+    private JPanel panel;
+      private JPopupMenu popup;
 
+    public LoginForm() {
+        // Initialize your components here
+        TEmail = new JTextField(20);
+        PPassword = new JPasswordField(20);
+        CBRemember = new JCheckBox("Remember Me");
+        loginButton = new JButton("Login");
+        
+         // Initialize popup menu
+        popup = new JPopupMenu();
+
+        // Load saved email and password if available
+        loadSavedCredentials();
+
+        // Add a listener to the email field to suggest password
+        TEmail.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                suggestPassword();
+            }
+        });
+
+        // Add action listener to the login button
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              // Perform login logic here
+            }
+         });
+            // Add action listener to the "Remember Me" checkbox
+        CBRemember.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                CBRememberActionPerformed(evt);
+            }
+
+        });
+
+        // Create a panel and add components to it
+        panel = new JPanel();
+        panel.add(new JLabel("Email:"));
+        panel.add(TEmail);
+        panel.add(new JLabel("Password:"));
+        panel.add(PPassword);
+        panel.add(CBRemember);
+        panel.add(loginButton);
+    }
+
+    public JPanel getPanel() {
+        return panel;
+    }
+
+    private void loadSavedCredentials() {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        String savedEmail = prefs.get("userEmail", "");
+        String savedPassword = prefs.get("userPassword", "");
+
+        TEmail.setText(savedEmail);
+        if (!savedEmail.isEmpty()) {
+            PPassword.setText(savedPassword);
+            CBRemember.setSelected(true);
+        }
+    }
+
+    private void suggestPassword() {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        String savedEmail = prefs.get("userEmail", "");
+        String savedPassword = prefs.get("userPassword", "");
+
+        String currentEmail = TEmail.getText();
+        if (currentEmail.equals(savedEmail)) {
+            // Suggest the password
+            JPopupMenu popup = new JPopupMenu();
+            JMenuItem suggestion = new JMenuItem(savedPassword);
+            suggestion.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    PPassword.setText(savedPassword);
+                     popup.setVisible(false);
+                }
+            });
+            popup.add(suggestion);
+            popup.show(TEmail, 0, TEmail.getHeight());
+        } else {
+            popup.setVisible(false);
+        }
+    }
+
+    private void saveCredentials() {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.put("userEmail", TEmail.getText());
+        prefs.put("userPassword", new String(PPassword.getPassword()));
+    }
+
+    private void clearCredentials() {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.remove("userEmail");
+        prefs.remove("userPassword");
+    }
+}
+    
  public void Connect(){
         try {
            Class.forName("com.mysql.jdbc.Driver");
@@ -391,7 +501,17 @@ private void openForgotPasswordDialog() {
         newPasswordField.setText(storedPassword);
         rememberPasswordCheckbox.setSelected(true);
     }
-
+  showPasswordCheckbox.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                // Show the password
+                newPasswordField.setEchoChar((char) 0); // Set the echo char to 0 to display the password in plain text
+            } else {
+                // Hide the password
+                newPasswordField.setEchoChar(defaultEchoChar); // Reset the echo char to default to hide the password
+            }
+        }
+    });
     saveButton.addActionListener(new ActionListener() {
     public void actionPerformed(ActionEvent e) {
         String email = emailField.getText();

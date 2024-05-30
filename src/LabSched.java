@@ -27,6 +27,7 @@ public final class LabSched extends javax.swing.JFrame {
     private Connection con;
     private int roomUsageCount;
     private Component frame;
+    private static int currentRowNumber = 0;
  
     
     public LabSched() throws ClassNotFoundException {
@@ -76,15 +77,24 @@ public final class LabSched extends javax.swing.JFrame {
         
     }
     
- private void connectToDatabase() throws ClassNotFoundException {
-           try {
-           Class.forName("com.mysql.jdbc.Driver");
-           con = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");           
-           System.out.println("Connected to the database. ");
-        } catch (SQLException ex) {
-        }
-    
+    /// Declare a user count variable
+int userCount = 0;
+
+// Method to be called when a new user logs in
+private void incrementUserCount() {
+    userCount++;
+}
+
+// Method to connect to the database
+private void connectToDatabase() throws ClassNotFoundException {
+    try {
+        Class.forName("com.mysql.jdbc.Driver");
+        con = DriverManager.getConnection("jdbc:mysql://localhost/labsched", "root", "12345");
+        System.out.println("Connected to the database.");
+    } catch (SQLException ex) {
+        ex.printStackTrace();
     }
+}
  
  
  public class DatabaseConnection {
@@ -164,12 +174,17 @@ public final class LabSched extends javax.swing.JFrame {
     DefaultTableModel model = (DefaultTableModel) LabTable.getModel();
     model.setRowCount(0); // Clear existing data
 
+        currentRowNumber = 0; // Reset row number counter
+
+    
     if (con != null) {
         try {
             String query = "SELECT * FROM lab";
             try (PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
                 
                 while (rs.next()) {
+                                        int rowNumber = ++currentRowNumber;
+
                     String name = rs.getString("name");
                     String position = rs.getString("position");
                     String semester = rs.getString("semester");
@@ -183,7 +198,7 @@ public final class LabSched extends javax.swing.JFrame {
                     String day = rs.getString("day");
                     String status = rs.getString("status");
                     
-                    model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
+                    model.addRow(new Object[]{rowNumber, name, position, semester, yearLevel, section, subject, time, room, month, week, day, status});
                 }
             }
         } catch (SQLException ex) {
@@ -249,11 +264,11 @@ public final class LabSched extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Position", "Semester", "Year Level", "Section", "Subject", "Time", "Room", "Month", "Week", "Day", "Status"
+                "No.", "Name", "Position", "Semester", "Year Level", "Section", "Subject", "Time", "Room", "Month", "Week", "Day", "Status"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -263,18 +278,18 @@ public final class LabSched extends javax.swing.JFrame {
         LabTable.setRowHeight(40);
         jScrollPane1.setViewportView(LabTable);
         if (LabTable.getColumnModel().getColumnCount() > 0) {
-            LabTable.getColumnModel().getColumn(0).setPreferredWidth(150);
             LabTable.getColumnModel().getColumn(1).setPreferredWidth(150);
-            LabTable.getColumnModel().getColumn(2).setPreferredWidth(130);
-            LabTable.getColumnModel().getColumn(3).setPreferredWidth(100);
-            LabTable.getColumnModel().getColumn(4).setPreferredWidth(70);
-            LabTable.getColumnModel().getColumn(5).setPreferredWidth(210);
-            LabTable.getColumnModel().getColumn(6).setPreferredWidth(170);
-            LabTable.getColumnModel().getColumn(7).setPreferredWidth(200);
-            LabTable.getColumnModel().getColumn(8).setPreferredWidth(80);
+            LabTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+            LabTable.getColumnModel().getColumn(3).setPreferredWidth(130);
+            LabTable.getColumnModel().getColumn(4).setPreferredWidth(100);
+            LabTable.getColumnModel().getColumn(5).setPreferredWidth(70);
+            LabTable.getColumnModel().getColumn(6).setPreferredWidth(210);
+            LabTable.getColumnModel().getColumn(7).setPreferredWidth(170);
+            LabTable.getColumnModel().getColumn(8).setPreferredWidth(200);
             LabTable.getColumnModel().getColumn(9).setPreferredWidth(80);
             LabTable.getColumnModel().getColumn(10).setPreferredWidth(80);
             LabTable.getColumnModel().getColumn(11).setPreferredWidth(80);
+            LabTable.getColumnModel().getColumn(12).setPreferredWidth(80);
         }
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -730,8 +745,7 @@ public final class LabSched extends javax.swing.JFrame {
     }
 }
     private void BAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BAddActionPerformed
-
- String name = TName.getText();
+String name = TName.getText();
 String position = (String) CBPosition.getSelectedItem();
 String room = (String) CBRoom.getSelectedItem();
 String month = (String) CBMonth.getSelectedItem();
@@ -751,7 +765,7 @@ if (name.isEmpty() || position == null || yearLevel == null || section == null |
     // Check if the selected laboratory room already has 3 users
     int roomUserCount = 0;
     for (int i = 0; i < model.getRowCount(); i++) {
-        String existingRoom = (String) model.getValueAt(i, 7);
+        String existingRoom = (String) model.getValueAt(i, 8); // Adjusted index for room
         if (room.equals(existingRoom)) {
             roomUserCount++;
         }
@@ -766,8 +780,8 @@ if (name.isEmpty() || position == null || yearLevel == null || section == null |
     if (confirmDialog == JOptionPane.YES_OPTION) {
         // Check if the selected room already has an entry for the opposite week
         for (int i = 0; i < model.getRowCount(); i++) {
-            String existingRoom = (String) model.getValueAt(i, 7);
-            String existingWeek = (String) model.getValueAt(i, 9);
+            String existingRoom = (String) model.getValueAt(i, 8); // Adjusted index for room
+            String existingWeek = (String) model.getValueAt(i, 10); // Adjusted index for week
             if (room.equals(existingRoom) && !week.equals(existingWeek)) {
                 JOptionPane.showMessageDialog(this, "The selected laboratory room already has an entry for the opposite week. You cannot add this entry.", "Week Assignment Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -779,8 +793,9 @@ if (name.isEmpty() || position == null || yearLevel == null || section == null |
         if (slotTaken) {
             JOptionPane.showMessageDialog(this, "The selected slot is already taken. Please choose a different time or room.", "Slot Taken", JOptionPane.ERROR_MESSAGE);
         } else {
-            model.addRow(new Object[]{name, position, semester, yearLevel, section, subject, time, room, month, week, day});
-            removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
+              int rowNumber = generateRowNumber();
+                    model.addRow(new Object[]{rowNumber, name, position, semester, yearLevel, section, subject, time, room, month, week, day});
+                    removeSelectedTimeSlotFromComboBox(month, week, day, time, room, section, yearLevel, semester);
 
             // Save data to database
             saveDataToDatabase(name, position, room, month, week, day, time, yearLevel, section, semester, subject);
@@ -788,8 +803,14 @@ if (name.isEmpty() || position == null || yearLevel == null || section == null |
             clearFields();
             loadTableData(); // Refresh the table data to show the newly added entry
         }
-        }
     }
+}
+    }
+
+  private static int generateRowNumber() {
+        return ++currentRowNumber;  
+    
+    
 }
     
     private boolean checkIfSlotTaken(String room, String month, String week, String day, String time, String semester) {
