@@ -1,3 +1,6 @@
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,6 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.DriverManager;
+import java.util.prefs.Preferences;
+
+
 
 
 public class UserLogin extends javax.swing.JFrame {
@@ -15,6 +21,8 @@ public class UserLogin extends javax.swing.JFrame {
     private static final String USER = "root";
     private static final String PASSWORD = "12345";
     Connection conn;
+Preferences preferences = Preferences.userNodeForPackage(this.getClass());
+
     
     public UserLogin() {
         initComponents();
@@ -26,12 +34,45 @@ public class UserLogin extends javax.swing.JFrame {
         try {
            Class.forName("com.mysql.jdbc.Driver");
            conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched","root", "12345");
-       } catch (ClassNotFoundException ex) {
-           Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
-       } catch (SQLException ex) {
+       } catch (ClassNotFoundException | SQLException ex) {
            Logger.getLogger(UserLogin.class.getName()).log(Level.SEVERE, null, ex);
        }
  }
+ 
+  private boolean confirmEmailInDatabase(String email) {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched", "root", "12345");
+            String query = "SELECT * FROM users WHERE username = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, email);
+                ResultSet rs = pstmt.executeQuery();
+                return rs.next(); // Returns true if the email exists in the database
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private void saveNewPassword(String email, String newPassword) {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/labsched", "root", "12345");
+            String query = "UPDATE users SET password = ? WHERE username = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, newPassword);
+                pstmt.setString(2, email);
+                int rowsUpdated = pstmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    JOptionPane.showMessageDialog(null, "Password changed successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to change password.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+ 
     
 
     /**
@@ -53,6 +94,10 @@ public class UserLogin extends javax.swing.JFrame {
         PPassword = new javax.swing.JPasswordField();
         BLogin = new javax.swing.JButton();
         BSignup = new javax.swing.JButton();
+        BForgot = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        CBShowpassword = new javax.swing.JCheckBox();
+        CBRemember = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -98,6 +143,30 @@ public class UserLogin extends javax.swing.JFrame {
             }
         });
 
+        BForgot.setText("Forgot");
+        BForgot.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BForgotActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        jLabel5.setText("Forgot Password?");
+
+        CBShowpassword.setText("Show Password");
+        CBShowpassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CBShowpasswordActionPerformed(evt);
+            }
+        });
+
+        CBRemember.setText("Remember Password");
+        CBRemember.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CBRememberActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -105,25 +174,37 @@ public class UserLogin extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(291, 291, 291)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(BSignup))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(107, 107, 107)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3))
                         .addGap(18, 18, 18)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(TEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(BLogin)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(291, 291, 291)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(BSignup)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(CBRemember)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(CBShowpassword))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(PPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(TEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(BLogin)))))
                 .addContainerGap(122, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(300, 300, 300))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(300, 300, 300))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(BForgot)
+                        .addGap(320, 320, 320))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -140,11 +221,19 @@ public class UserLogin extends javax.swing.JFrame {
                     .addComponent(PPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(BLogin)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(CBShowpassword)
+                    .addComponent(CBRemember))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(BForgot)
+                    .addComponent(jLabel5))
+                .addGap(27, 27, 27)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(BSignup))
-                .addGap(48, 48, 48))
+                .addGap(91, 91, 91))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -179,8 +268,7 @@ public class UserLogin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BLoginActionPerformed(java.awt.event.ActionEvent evt) {                                       
-    
-     String userEmail = TEmail.getText();
+   String userEmail = TEmail.getText();
     String userPassword = new String(PPassword.getPassword());
 
     try {
@@ -196,8 +284,8 @@ public class UserLogin extends javax.swing.JFrame {
 
             // Close the login frame or panel
             setVisible(false); // Assuming this code is inside your login frame or panel
-            
-            adminPanel dashboardPanel = null;    
+
+            adminPanel dashboardPanel = null;
             try {
                 dashboardPanel = new adminPanel();
             } catch (ClassNotFoundException ex) {
@@ -221,6 +309,14 @@ public class UserLogin extends javax.swing.JFrame {
             // Optionally, you can clear the input fields after successful login
             TEmail.setText("");
             PPassword.setText("");
+
+            // Check if Remember Password is selected
+            if (CBRemember.isSelected()) {
+                // Save the email and password in preferences
+                Preferences prefs = Preferences.userNodeForPackage(getClass());
+                prefs.put("userEmail", userEmail);
+                prefs.put("userPassword", userPassword);
+            }
         } else {
             // If login fails, show an error dialog
             JOptionPane.showMessageDialog(this, "Login failed. Please check your credentials.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -228,7 +324,8 @@ public class UserLogin extends javax.swing.JFrame {
     } catch (SQLException ex) {
         java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
-    }                                        
+    }                                       
+                                     
                                   
 
     private void BSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BSignupActionPerformed
@@ -237,6 +334,122 @@ public class UserLogin extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_BSignupActionPerformed
 
+    private void BForgotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BForgotActionPerformed
+       openForgotPasswordDialog();
+
+    }//GEN-LAST:event_BForgotActionPerformed
+
+    private void CBShowpasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CBShowpasswordActionPerformed
+ // Check if the checkbox is selected
+    if (CBShowpassword.isSelected()) {
+        // Show the password
+        PPassword.setEchoChar((char) 0); // Set the echo char to 0 to display the password in plain text
+    } else {
+        // Hide the password
+        PPassword.setEchoChar('\u25cf'); // Reset the echo char to default (bullet character) to hide the password
+    }
+
+    }//GEN-LAST:event_CBShowpasswordActionPerformed
+
+    private void CBRememberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CBRememberActionPerformed
+  // Check if the checkbox is selected
+    if (CBRemember.isSelected()) {
+        // Save the email and password in preferences
+        String userEmail = TEmail.getText();
+        String userPassword = new String(PPassword.getPassword());
+
+        // Use the Preferences API to store the user's email and password
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.put("userEmail", userEmail);
+        prefs.put("userPassword", userPassword);
+    } else {
+        // If the checkbox is not selected, clear the stored email and password
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.remove("userEmail");
+        prefs.remove("userPassword");
+    }
+
+
+    }//GEN-LAST:event_CBRememberActionPerformed
+
+private void openForgotPasswordDialog() {
+    JDialog dialog = new JDialog(this, "Create New Password", true);
+    JTextField emailField = new JTextField(20);
+    JPasswordField newPasswordField = new JPasswordField(20);
+    JCheckBox rememberPasswordCheckbox = new JCheckBox("Remember Password");
+    JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
+    JButton saveButton = new JButton("Save");
+
+    // Define a variable to store the original password field's echo char
+    char defaultEchoChar = newPasswordField.getEchoChar();
+
+    // Retrieve stored email and password, if available
+    String storedEmail = preferences.get("email", "");
+    String storedPassword = preferences.get("password", "");
+    if (!storedEmail.isEmpty()) {
+        emailField.setText(storedEmail);
+        newPasswordField.setText(storedPassword);
+        rememberPasswordCheckbox.setSelected(true);
+    }
+
+    saveButton.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        String email = emailField.getText();
+        String newPassword = new String(newPasswordField.getPassword());
+        
+        // Check if email is empty or does not end with "@gmail.com"
+        if (email.isEmpty() || !email.toLowerCase().endsWith("@gmail.com")) {
+            JOptionPane.showMessageDialog(dialog, "Invalid email format.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (!confirmEmailInDatabase(email)) {
+            JOptionPane.showMessageDialog(dialog, "Email does not exist in the database.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Check if new password is empty
+        if (newPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, "New password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Store email and password if "Remember Password" is selected
+        if (rememberPasswordCheckbox.isSelected()) {
+            preferences.put("email", email);
+            preferences.put("password", newPassword);
+        }
+        
+        saveNewPassword(email, newPassword);
+        dialog.dispose();
+    }
+});
+    
+    
+    
+
+    JPanel panel = new JPanel(new GridLayout(5, 1, 5, 5)); // Adjust grid layout for spacing
+    panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+    panel.add(new JLabel("Enter your email:"));
+    panel.add(emailField);
+    panel.add(new JLabel("Enter your new password:"));
+    panel.add(newPasswordField);
+    panel.add(rememberPasswordCheckbox);
+    panel.add(showPasswordCheckbox);
+    panel.add(saveButton);
+
+    dialog.add(panel);
+    dialog.pack();
+    dialog.setLocationRelativeTo(null); // Center the dialog on the screen
+    dialog.setVisible(true);
+}
+
+
+
+
+
+
+    
     /**
      * @param args the command line arguments
      */
@@ -253,15 +466,11 @@ public class UserLogin extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        
         //</editor-fold>
 
         /* Create and display the form */
@@ -271,15 +480,21 @@ public class UserLogin extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton BForgot;
     private javax.swing.JButton BLogin;
     private javax.swing.JButton BSignup;
+    private javax.swing.JCheckBox CBRemember;
+    private javax.swing.JCheckBox CBShowpassword;
     private javax.swing.JPasswordField PPassword;
     private javax.swing.JTextField TEmail;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
+
+    
 }
